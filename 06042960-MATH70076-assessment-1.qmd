@@ -197,10 +197,29 @@ _End of Assessment._
 #| eval: false
 #| code-fold: true
 
+gpd_sample <- read.csv(file = "gpd_samples.csv")
 gpd_parameters <- read.csv(file = "gpd_parameters.csv")
-probability <- seq(0, 1, 0.05)
-for (p in seq_along(probability)){
-  
+
+pgpd <- function(x, mu, sigma, psi){
+  if (x < mu){
+    return("Error: X less than mu")
+  }
+  if (psi != 0){
+    max_val <- 1 + psi*(x - mu)/sigma
+    return (1 - max(max_val, 0)^(-1/psi))
+  }else{
+    return (1 - exp(-(x - mu)/sigma))
+  }
+}
+
+ids <- factor(gpd_parameters$id)
+for (id in ids){
+  samples <- gpd_sample[gpd_sample$set_id == id, ]
+  param <- gpd_parameters[gpd_parameters$id == id, ]
+  mu <-param$u_sim
+  sigma <- param$sig_sim
+  psi <- param$xi_sim
+  plot(samples$value, pgpd(samples$value, mu, sigma, psi))
 }
 
 ```
