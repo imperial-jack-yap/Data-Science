@@ -68,7 +68,7 @@ The probability integral transform states that if a random variable $X$ has a co
 
 ###  Question 1 
 
-Derive an expression for the inverse cumulative distribution function (also known as the quantile function) $F^{-1}_X: [0,1] \rightarrow [u, x^+]$ of $X \sim \text{GPD}(u, \sigma, \xi)$. Your answer should refer to at least one equation given in the background material. 
+Derive an expression for the inverse cumulative distribution function (also known as the quantile function) $F^{-1}_X: [0,1] \rightarrow [u, x^+]$ of $X \sim \text{GPD}(u, \sigma, \xi)$. Your answer should refer to at least one equation given in the background material. 2  
 
 ::: {.callout-tip}
 ## Set yourself up for success
@@ -83,8 +83,36 @@ Does your answer contain:
 
 
 <!-- YOUR DERIVATION GOES HERE -->
+We will start off with the easier derivation for when $\xi = 0$, where the inverse CDF is just some basic algebra. To start off we will let $a$ be a realisation of the random uniform distribution, $A$, i.e. $A \sim U(0,1)$. Equating $a$ to the CDF proposed in \@ref(eq-gpd_cdf), where $\xi = 0$, we obtain the following:
 
+$$
+a = 1 - \exp\!\left(-\dfrac{x-u}{\sigma}\right).
+$$
+Rearranging for x, we get an exact solution for the inverse
+$$
+x = \sigma ln(\dfrac{1}{1 - a}) + u.
+$${#eq-xi-zero}
 
+It gets slightly trickier when $\xi \neq 0$ as the CDF now contains a maximum which we cannot invert as easily, and thus we should consider cases where $\xi > 0$ and $\xi < 0$. Observing the tail behaviour for each case, when $xi$ is greater than zero, $1 + \dfrac{\xi(x - u)}{\sigma} > 0$ for any values of $\sigma > 0$ and $x \geq u$ and thus we do not need to consider any unexpected tail behaviours. For $\xi < 0$, we have that $\dfrac{\xi(x - u)}{\sigma} < 0$ and since $0 < F_X(x; \sigma, \xi,u) <1$, we have that $0 < \dfrac{\xi(x - u)}{\sigma} < -1$ for this to not hit 0. Therefore, we have the bounds for $x \in [u, x^+]$ with $x^+ = u - \dfrac{\sigma}{\xi}$. With the bounds consider foir when $x$ is valid, we can now calculate the inverse of the CDF for $\xi \neq 0$.
+
+Similar to the derivation for \@ref{eq-xi-zero}, we let $a$ be the realisation of the uniform distribution, A. 
+$$
+a = 1 - \left(1 + \dfrac{\xi(x - u)}{\sigma}\right)_+^{-1/\xi},
+$$
+$$
+x = u + \left(\dfrac{(1-A)^{-\xi}}{\xi} - 1\right){\sigma}. 
+$$ #{eq-xi-neq-zero}
+
+Having derived the inverse CDF for both cases, we combine \@ref{eq-xi-zero} and \@ref{eq-xi-neq-zero} to obtain the quantile function for the Generalised Pareto Distribution (GPD).
+
+$$
+F^{-1}_X(p; \sigma, \xi, u) = 
+\begin{cases}
+1 - \left(1 + \dfrac{\xi(x - u)}{\sigma}\right)_+^{-1/\xi}, &\xi \neq 0, \,  u \leq x \leq x^+; \; \\[1.2em]
+1 - \exp\!\left(-\dfrac{x-u}{\sigma}\right), &\xi = 0, \, x \geq u; \;
+\end{cases}
+$$
+where $p \in [0,1]$ and $x^+ = u - \dfrac{\sigma}{\xi}$.
 
 ### Question 2 
 
@@ -116,11 +144,12 @@ qgpd <- function(p, mu, sigma, psi){
   }else{
     q <- ((1/(1 - p)^psi) - 1)*sigma/psi + mu
   }
-  if (q < mu || q > mu - sigma/psi){
-    throw("Value Error")
-  }else{
-    return (q)
-  }
+  return (q)
+  #if (q < mu || q > mu - sigma/psi){
+  #  print("Value Error")
+  #}else{
+  #  return (q)
+  #}
 }
 
 qgpd(0.5, mu = 1.5, sigma = 2, psi = -0.4)
@@ -200,31 +229,50 @@ _End of Assessment._
 gpd_sample <- read.csv(file = "gpd_samples.csv")
 gpd_parameters <- read.csv(file = "gpd_parameters.csv")
 
-pgpd <- function(x, mu, sigma, psi){
-  if (x < mu){
-    return("Error: X less than mu")
-  }
-  if (psi != 0){
-    max_val <- 1 + psi*(x - mu)/sigma
-    return (1 - max(max_val, 0)^(-1/psi))
-  }else{
-    return (1 - exp(-(x - mu)/sigma))
-  }
-}
+
+vec_qgpd <- Vectorize(qgpd)
 
 ids <- factor(gpd_parameters$id)
+par(mfrow = c(3,3))
 for (id in ids){
   samples <- gpd_sample[gpd_sample$set_id == id, ]
   param <- gpd_parameters[gpd_parameters$id == id, ]
-  mu <-param$u_sim
+   
+  mu <- param$u_sim
   sigma <- param$sig_sim
   psi <- param$xi_sim
-  plot(samples$value, pgpd(samples$value, mu, sigma, psi))
+   
+  sim_q <- samples$value
+  the_q <- vec_qgpd(ppoints(100), mu, sigma, psi)
+   
+  qqplot(the_q, sim_q, xlab = "Theoreticla Quantiles", ylab = "Actual Quantiles", 
+         main=paste("QQ-plot for ID:", id),
+         cex = 0.6)
+  abline(0, 1, col='red')
 }
-
 ```
 
+```{r ref.label=knitr::all_labels()}
+#| echo: true
+#| eval: false
+#| code-fold: true
 
+riverflow_data <- read.csv("riverflow_2015_2024.csv")
+hist(riverflow_data$baseline_mean)
 
+ex_flow_df <- riverflow_data[riverflow_data$flow > 75,]
+ex_flow <- ex_flow_df$flow
 
+vec_qpgd <- Vectorize(qgpd)
+#Model Parameters
+sigma <- 29.7
+psi <- 0.62
+u <- 0
 
+theoretical_quantiles <- vec_qgpd(ppoints(250), sigma = sigma, psi = psi, mu = u)
+hist(theoretical_quantiles)
+hist(ex_flow, add =TRUE)
+qqplot(theoretical_quantiles, ex_flow, xlab = "Theoretical Quantiles", ylab = "Actual Quantiles",
+      main = paste("QQ-plot for Flows Exceeding 75 cumecs"))
+abline(0, 1, col="red")
+```
