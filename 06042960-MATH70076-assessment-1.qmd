@@ -95,11 +95,11 @@ $$
 x = \sigma \ln\!\left(\dfrac{1}{1 - a}\right) + u.
 $$ {#eq-xi-zero}
 
-It gets slightly trickier when $\xi \neq 0$ as the CDF now contains a maximum which we cannot invert as easily, and thus we should consider cases where $\xi > 0$ and $\xi < 0$. Observing the tail behaviour for each case, when $xi$ is greater than zero, $1 + \dfrac{\xi(x - u)}{\sigma} > 0$ for any values of $\sigma > 0$ and $x \geq u$ and thus we do not need to consider any unexpected tail behaviours. For $\xi < 0$, we have that $\dfrac{\xi(x - u)}{\sigma} < 0$ and since $0 < F_X(x; \sigma, \xi,u) <1$, we have that $0 < \dfrac{\xi(x - u)}{\sigma} < -1$ for this to not hit 0. Therefore, we have the bounds for $x \in [u, x^+]$ with $x^+ = u - \dfrac{\sigma}{\xi}$. With the bounds considered for when $x$ is valid, we can now calculate the inverse of the CDF for $\xi \neq 0$.
+It gets slightly trickier when $\xi \neq 0$ as the CDF now contains a maximum which we cannot invert as easily, and thus we should consider cases where $\xi > 0$ and $\xi < 0$. Observing the tail behaviour for each case, when $\xi$ is greater than zero, $1 + \dfrac{\xi(x - u)}{\sigma} > 0$ for any values of $\sigma > 0$ and $x \geq u$ and thus we do not need to consider any unexpected tail behaviours. For $\xi < 0$, we have that $\dfrac{\xi(x - u)}{\sigma} < 0$ and since $0 < F_X(x; \sigma, \xi,u) <1$, we must have $0 < \dfrac{\xi(x - u)}{\sigma} < -1$. Thus, we can derive the bounds for $x$,  $x \in [u, x^+]$ with $x^+ = u - \dfrac{\sigma}{\xi}$. With the bounds considered for when $x$ is valid, we can now calculate the inverse of the CDF for $\xi \neq 0$.
 
-Similar to the derivation for (@eq-xi-zero), we let $a$ be the realisation of the uniform distribution, A. 
+Similar to the derivation for (@eq-xi-zero), we let $a$ be the realisation of the uniform distribution, A. We can ignore the maximum function in this case as we have already derived the bounds for each cases.
 $$
-a = 1 - \left(1 + \dfrac{\xi(x - u)}{\sigma}\right)_+^{-1/\xi},
+a = 1 - \left(1 + \dfrac{\xi(x - u)}{\sigma}\right)^{-1/\xi},
 $$
 $$
 x = u + \left(\dfrac{(1-A)^{-\xi}}{\xi} - 1\right){\sigma}. 
@@ -110,11 +110,11 @@ Having derived the inverse CDF for both cases, we combine (@eq-xi-zero) and (@eq
 $$
 F^{-1}_X(p; \sigma, \xi, u) = 
 \begin{cases}
-1 - \left(1 + \dfrac{\xi(x - u)}{\sigma}\right)_+^{-1/\xi}, &\xi \neq 0, \,  u \leq x \leq x^+; \; \\[1.2em]
-1 - \exp\!\left(-\dfrac{x-u}{\sigma}\right), &\xi = 0, \, x \geq u; \;
+u + \left(\dfrac{(1-A)^{-\xi}}{\xi} - 1\right){\sigma}, &\xi \neq 0; \; \\[1.2em]
+\sigma \ln\!\left(\dfrac{1}{1 - p}\right) + u; &\xi = 0; \;
 \end{cases}
 $$ {#eq-inv-cdf}
-where $p \in [0,1]$ and $x^+ = u - \dfrac{\sigma}{\xi}$.
+where $p \in [0,1]$, with $F^{-1}_X: p \in [0,1] \rightarrow [u, x^+]$.
 
 ### Question 2 
 
@@ -138,7 +138,10 @@ Does your answer:
 
 :::
 
+Function for caclulating quantile of Generlaised Pareto Distribution:
+
 ```{r}
+#Question 2 code
 #' Generalised Pareto Distribution Quantile Plot
 #'
 #' @param p Cumulative probability can only be between 0 and 1.
@@ -166,9 +169,18 @@ qgpd <- function(p, mu, sigma, xi){
   return (q)
 }
 
+```
+
+Quantiles, $x_p$ of Generalised Pareto Distribution with parameters $u = 1.5, \, \sigma = 2, \, \xi = -0.4$ for $p = 0.5, \, 0.75, \, 0.99$.
+
+```{r}
+#p = 0.5
 qgpd(0.5, mu = 1.5, sigma = 2, xi = -0.4)
+#p = 0.75
 qgpd(0.75, mu = 1.5, sigma = 2, xi = -0.4)
+#p = 0.99
 qgpd(0.99, mu = 1.5, sigma = 2, xi = -0.4)
+
 ```
 
 ### Question 3
@@ -195,6 +207,11 @@ Does your solution contain:
 <!-- YOUR ANSWER GOES HERE --> 
 ```{r}
 #| echo: false
+#| label: fig-qqplot_q3
+#| fig-cap: "Quantile-Quantile plot for gpd_samples"
+#| fig-pos: "H"
+
+#Question 3 Code
 
 gpd_sample <- read.csv(file = "gpd_samples.csv")
 gpd_parameters <- read.csv(file = "gpd_parameters.csv")
@@ -203,26 +220,38 @@ gpd_parameters <- read.csv(file = "gpd_parameters.csv")
 qgpd <- Vectorize(qgpd, vectorize.args = 'p')
 
 ids <- factor(gpd_parameters$id)
+
 #Plotting all plots in a 2x3 figure
 par(mfrow = c(2,3))
+
 #Looping thorugh each unique ids to plot qqplots
 for (id in ids){
   samples <- gpd_sample[gpd_sample$set_id == id, ]
   param <- gpd_parameters[gpd_parameters$id == id, ]
+  
+  #Reported Parameters
+  mu <- param$u
+  sigma <- param$sigma
+  psi <- param$xi
    
-  mu <- param$u_sim
-  sigma <- param$sig_sim
-  psi <- param$xi_sim
-   
+  #Empirical quantiles
   actual_q <- samples$value
   theoretical_q <- qgpd(ppoints(100), mu, sigma, psi)
    
-  qqplot(theoretical_q, actual_q, xlab = "Theoretical Quantiles", ylab = "Actual Quantiles", 
+  qqplot(theoretical_q, actual_q, 
+        xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles", 
          main=paste("QQ-plot for ID:", id),
          cex = 0.6)
   abline(0, 1, col='red')
 }
+
 ```
+
+From @fig-qqplot_q3, we can clearly see that the plots for id = a, c, d and e, deviating from the theoretical quantiles. In particular, for d and e, where the empirical quantiles diverge substanially from the theoretical line. This strongly indicates that their parameter were likely recorded incorrectly. 
+
+For a and c, there are partial alignments with the theoretical and empirical quantiles. However, due to the limited number of data points, it is difficult to draw a clear conclusion on whether the parameters were recorded accurately. Additional data needs to be collected for a more reliable conclusion on the reliability of the parameters.
+
+In contrast, for b and f, we can see that most empirical quantiles align closely follow the theoretical quantiles, suggesting good parameter accuracy. Although f shows some deviation at the tails, we believe these are likely due to outliers. Therfore, we can conclude with reasonable confidence that he parameters for b and e were recorded correctly. 
 
 ### Question 4
 
@@ -250,8 +279,98 @@ Does your answer contain:
 
 
 <!-- YOUR INVESTIGATION GOES HERE --> 
+To conduct an exploratory investigation of the claim that the distribution is constant over time, we plotted the time series plot of the river flow data from 2015 to 2024 with dashed vertical lines separating the years. This allows us to visualise trends and yearly fluctuations in flow patterns.
 
+```{r}
+#| echo: false
+#| label: fig-ts
+#| fig-cap: "Time Series Plot of River Flow (2015 - 2024)"
+#| fig-pos: "H"
 
+#Question 4 code
+library(ggplot2)
+
+riverflow_data <- read.csv("riverflow_2015_2024.csv")
+riverflow_data$date <- as.Date(riverflow_data$date, 
+                              format = "%Y-%m-%d")
+riverflow_data$years <- format(riverflow_data$date, "%Y")
+
+year_lines <- seq(as.Date("2015-01-01"), as.Date("2025-01-01"),
+                by = '1 year')
+
+ggplot(riverflow_data, aes(x = date, y = flow))+
+  geom_line(color = 'black')+
+  geom_vline(xintercept = year_lines,
+            color = 'red', linetype = 'dashed')+
+  labs(
+    title = 'Time Series Plot of River Flow (2015 - 2024)',
+    x = 'Date',
+    y = 'Flow'
+  )
+
+```
+
+From @fig-ts, we can see that the time series plot is consistent throughout the years, with recurring spikes every year. This suggests that the overall distribution is may be constant over time. To investigate furhter, we plot the boxplots by year to give us a better understand the quantiles for each year.
+
+```{r}
+#| echo: false
+#| label: fig-boxplot
+#| fig-cap: "Box Plot of River Flow from 2015 to 2024"
+#| fig-pos: "h"
+
+ggplot(riverflow_data, aes(x = years, y = flow))+
+  geom_boxplot(fill = 'black', color = 'lightblue',
+              outlier.color = 'red')+
+  labs(title = "Box Plot of River Flow (2015 - 2024)",
+       x = 'Years',
+       y = 'River Flow')
+
+```
+The boxplot as shown in @fig-boxplot for the each year's distribution shows that they are very similar in range and spread, further supporting the hydrologist's assumption that the distribution is roughly constant over time.The outliers correspond to extreme events and these occur across all the years. Therefore, from explarotary investigation we can accept the hydrologist's proposal of distribution of river flow values being constant over time. 
+
+Next, we test second claim that river flows exceeding 75 cumecs follows a Pareto distribution with parameters ($\sigma = 29.7, \, \xi = 0.62, \, u = 0$). To start off, we will overlay a histogram of the empirical and theoretical distributions below.
+
+```{r}
+#| echo: false
+#| label: fig-hist-flow
+#| fig-cap: "Histogram of River Flow between 2015 to 2024"
+#| fig-pos: "H"
+
+ex_flow_df <- riverflow_data[riverflow_data$flow > 75,]
+ex_flow <- ex_flow_df$flow
+
+sigma <- 29.7
+xi <- 0.62
+u <- 0
+
+theoretical_quantiles <- qgpd(ppoints(250), sigma = sigma, 
+                              xi = xi, mu = u)
+
+hist(theoretical_quantiles, col = rgb(0.4, 0.6, 1, 0.5),
+    main = "Histogram of Empirical and Theoretical Quantiles",
+     xlab = "Value", ylab = "Frequency", breaks = 30)
+hist(ex_flow, col = rgb(1, 0.4, 0.4, 0.5), breaks = 30,
+     add = TRUE)
+
+```
+
+From the histogram, @fig-hist-flow, of the two distributions, we see that the distributions are very different from one another and this suggests that flows exceeding 75 cumecs does not follow the suggested distribution. To further prove our hyptohesis, a Q-Q plot is used to compare the theoretical and empirical quantiles further.
+
+```{r}
+#| echo: false
+#| label: fig-qq-river
+#| fig-cap: "Q-Q plot of River Flows exceeding 75 cumecs"
+#| fig-pos: "h"
+
+#Model Parameters
+qqplot(theoretical_quantiles, ex_flow,
+      xlab = "Theoretical Quantiles", ylab = "Empirical Quantiles",
+      main = paste("QQ-plot for Flows Exceeding 75 cumecs"))
+abline(0, 1, col="red")
+
+```
+
+From the Q-Q plot, @fig-qq-river, we can clearly see that the empirical quantiles deviates significantly from the theoretical line, indicating that the proposed GPD do not fit well with the data. This confirms our hypothesis and we conclude that the river flows above 75 cumecs do not follow a GPD$(\sigma = 29.7, \, \xi = 0.62, \, u = 0)$ distribution.
 
 ::: {.callout-tip}
 ## Set yourself up for success 
@@ -268,56 +387,4 @@ _End of Assessment._
 #| echo: true
 #| eval: false
 #| code-fold: true
-
-gpd_sample <- read.csv(file = "gpd_samples.csv")
-gpd_parameters <- read.csv(file = "gpd_parameters.csv")
-
-
-qgpd <- Vectorize(qgpd, vectorize.args = 'p')
-
-ids <- factor(gpd_parameters$id)
-#Plotting all plots in a 2x3 figure
-par(mfrow = c(2,3))
-#Looping thorugh each unique ids to plot qqplots
-for (id in ids){
-  samples <- gpd_sample[gpd_sample$set_id == id, ]
-  param <- gpd_parameters[gpd_parameters$id == id, ]
-   
-  mu <- param$u_sim
-  sigma <- param$sig_sim
-  psi <- param$xi_sim
-   
-  actual_q <- samples$value
-  theoretical_q <- qgpd(ppoints(100), mu, sigma, psi)
-   
-  qqplot(theoretical_q, actual_q, xlab = "Theoretical Quantiles", ylab = "Actual Quantiles", 
-         main=paste("QQ-plot for ID:", id),
-         cex = 0.6)
-  abline(0, 1, col='red')
-}
-```
-
-```{r ref.label=knitr::all_labels()}
-#| echo: true
-#| eval: false
-#| code-fold: true
-
-riverflow_data <- read.csv("riverflow_2015_2024.csv")
-hist(riverflow_data$baseline_mean)
-
-ex_flow_df <- riverflow_data[riverflow_data$flow > 75,]
-ex_flow <- ex_flow_df$flow
-
-vec_qpgd <- Vectorize(qgpd)
-#Model Parameters
-sigma <- 29.7
-psi <- 0.62
-u <- 0
-
-theoretical_quantiles <- vec_qgpd(ppoints(250), sigma = sigma, psi = psi, mu = u)
-hist(theoretical_quantiles)
-hist(ex_flow, add =TRUE)
-qqplot(theoretical_quantiles, ex_flow, xlab = "Theoretical Quantiles", ylab = "Actual Quantiles",
-      main = paste("QQ-plot for Flows Exceeding 75 cumecs"))
-abline(0, 1, col="red")
 ```
