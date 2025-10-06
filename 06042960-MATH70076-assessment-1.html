@@ -55,7 +55,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}</style>
 
 
 <script>/*!
@@ -2331,6 +2351,7 @@ window.Quarto = {
   <li><a href="#question-4" id="toc-question-4" class="nav-link" data-scroll-target="#question-4">Question 4</a></li>
   </ul></li>
   <li><a href="#sec-code-appendix" id="toc-sec-code-appendix" class="nav-link" data-scroll-target="#sec-code-appendix">Code Appendix</a></li>
+  <li><a href="#sec-ref" id="toc-sec-ref" class="nav-link" data-scroll-target="#sec-ref">References</a></li>
   </ul>
 </nav>
 </div>
@@ -2409,7 +2430,7 @@ f(x;\sigma,\xi,u) =
 <h2 class="anchored" data-anchor-id="questions">Questions</h2>
 <section id="question-1" class="level3">
 <h3 class="anchored" data-anchor-id="question-1">Question 1</h3>
-<p>Derive an expression for the inverse cumulative distribution function (also known as the quantile function) <span class="math inline">\(F^{-1}_X: [0,1] \rightarrow [u, x^+]\)</span> of <span class="math inline">\(X \sim \text{GPD}(u, \sigma, \xi)\)</span>. Your answer should refer to at least one equation given in the background material.</p>
+<p>Derive an expression for the inverse cumulative distribution function (also known as the quantile function) <span class="math inline">\(F^{-1}_X: [0,1] \rightarrow [u, min(x^+, \infty)]\)</span> of <span class="math inline">\(X \sim \text{GPD}(u, \sigma, \xi)\)</span>. Your answer should refer to at least one equation given in the background material.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2449,7 +2470,7 @@ F^{-1}_X(p; \sigma, \xi, u) =
 u + \left(\dfrac{(1-A)^{-\xi}}{\xi} - 1\right){\sigma}, &amp;\xi \neq 0; \; \\[1.2em]
 \sigma \ln\!\left(\dfrac{1}{1 - p}\right) + u; &amp;\xi = 0; \;
 \end{cases}
-\tag{5}\]</span></span> where <span class="math inline">\(p \in [0,1]\)</span>, with <span class="math inline">\(F^{-1}_X: p \in [0,1] \rightarrow [u, x^+]\)</span>.</p>
+\tag{5}\]</span></span> where <span class="math inline">\(p \in [0,1]\)</span>, with <span class="math inline">\(F^{-1}_X: p \in [0,1] \rightarrow [u, min(x^+, \infty)]\)</span>.</p>
 </section>
 <section id="question-2" class="level3">
 <h3 class="anchored" data-anchor-id="question-2">Question 2</h3>
@@ -2663,6 +2684,7 @@ Figure 5: Q-Q plot of River Flows exceeding 75 cumecs
 </div>
 </div>
 <p>From the Q-Q plot, <a href="#fig-qq-river" class="quarto-xref">Figure 5</a>, we can clearly see that the empirical quantiles deviates significantly from the theoretical line, indicating that the proposed GPD do not fit well with the data. This confirms our hypothesis and we conclude that the river flows above 75 cumecs do not follow a GPD<span class="math inline">\((\sigma = 29.7, \, \xi = 0.62, \, u = 0)\)</span> distribution.</p>
+<p><a href="#fig-ts" class="quarto-xref">Figure 2</a> and <a href="#fig-boxplot" class="quarto-xref">Figure 3</a> were generated using ggplot2 <span class="citation" data-cites="wickham2016ggplot2">(<a href="#ref-wickham2016ggplot2" role="doc-biblioref">Wickham 2016</a>)</span>. The rest of the analysis was conducted in R <span class="citation" data-cites="R2025">(<a href="#ref-R2025" role="doc-biblioref">R Core Team 2025</a>)</span></p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2807,8 +2829,19 @@ Set yourself up for success
 </details>
 </div>
 </section>
+<section id="sec-ref" class="level1 unnumbered">
 
-</main>
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-R2025" class="csl-entry" role="listitem">
+R Core Team. 2025. <em>R: A Language and Environment for Statistical Computing</em>. R Foundation for Statistical Computing. <a href="https://www.R-project.org/">https://www.R-project.org/</a>.
+</div>
+<div id="ref-wickham2016ggplot2" class="csl-entry" role="listitem">
+Wickham, Hadley. 2016. <em>Ggplot2: Elegant Graphics for Data Analysis</em>. Springer-Verlag New York.
+</div>
+</div></section></div></main>
 <!-- /main column -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {

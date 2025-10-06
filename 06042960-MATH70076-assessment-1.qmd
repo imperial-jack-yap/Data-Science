@@ -11,7 +11,7 @@ format:
     number-sections: true
     documentclass: article
 format-links: false
-bibliography: example.bib 
+bibliography: references.bib 
 ---
 
 **Deadline:  Friday 10 October 2025 at 13:00.**
@@ -70,7 +70,7 @@ The probability integral transform states that if a random variable $X$ has a co
 
 ###  Question 1 
 
-Derive an expression for the inverse cumulative distribution function (also known as the quantile function) $F^{-1}_X: [0,1] \rightarrow [u, x^+]$ of $X \sim \text{GPD}(u, \sigma, \xi)$. Your answer should refer to at least one equation given in the background material. 
+Derive an expression for the inverse cumulative distribution function (also known as the quantile function) $F^{-1}_X: [0,1] \rightarrow [u, min(x^+, \infty)]$ of $X \sim \text{GPD}(u, \sigma, \xi)$. Your answer should refer to at least one equation given in the background material. 
 
 ::: {.callout-tip}
 ## Set yourself up for success
@@ -114,7 +114,7 @@ u + \left(\dfrac{(1-A)^{-\xi}}{\xi} - 1\right){\sigma}, &\xi \neq 0; \; \\[1.2em
 \sigma \ln\!\left(\dfrac{1}{1 - p}\right) + u; &\xi = 0; \;
 \end{cases}
 $$ {#eq-inv-cdf}
-where $p \in [0,1]$, with $F^{-1}_X: p \in [0,1] \rightarrow [u, x^+]$.
+where $p \in [0,1]$, with $F^{-1}_X: p \in [0,1] \rightarrow [u, min(x^+, \infty)]$.
 
 ### Question 2 
 
@@ -326,7 +326,7 @@ ggplot(riverflow_data, aes(x = years, y = flow))+
        y = 'River Flow')
 
 ```
-The boxplot as shown in @fig-boxplot for the each year's distribution shows that they are very similar in range and spread, further supporting the hydrologist's assumption that the distribution is roughly constant over time.The outliers correspond to extreme events and these occur across all the years. Therefore, from explarotary investigation we can accept the hydrologist's proposal of distribution of river flow values being constant over time. 
+The boxplot as shown in @fig-boxplot for the each year's distribution shows that they are very similar in range and spread, further supporting the hydrologist's assumption that the distribution is roughly constant over time.The outliers correspond to extreme events and these occur across all the years. Therefore, from explarotary investigation we can accept the hydrologist's proposal of distribution of river flow values being constant over time.
 
 Next, we test second claim that river flows exceeding 75 cumecs follows a Pareto distribution with parameters ($\sigma = 29.7, \, \xi = 0.62, \, u = 0$). To start off, we will overlay a histogram of the empirical and theoretical distributions below.
 
@@ -372,6 +372,8 @@ abline(0, 1, col="red")
 
 From the Q-Q plot, @fig-qq-river, we can clearly see that the empirical quantiles deviates significantly from the theoretical line, indicating that the proposed GPD do not fit well with the data. This confirms our hypothesis and we conclude that the river flows above 75 cumecs do not follow a GPD$(\sigma = 29.7, \, \xi = 0.62, \, u = 0)$ distribution.
 
+@fig-ts and @fig-boxplot were generated using ggplot2 [@wickham2016ggplot2]. The rest of the analysis was conducted in R [@R2025]
+
 ::: {.callout-tip}
 ## Set yourself up for success 
 
@@ -388,3 +390,5 @@ _End of Assessment._
 #| eval: false
 #| code-fold: true
 ```
+
+# References {#sec-ref}
